@@ -3,7 +3,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score, classification_report
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import MultiLabelBinarizer, StandardScaler
-# from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 def train_logistic_regression(train, val, test, outfile):
@@ -39,7 +38,6 @@ def train_logistic_regression(train, val, test, outfile):
         test_labels_binary = mlb.transform(test_labels)
         
         # Initialize the Logistic Regression classifier with OneVsRest strategy
-
         clf = OneVsRestClassifier(LogisticRegression(max_iter=20000, class_weight='balanced', C=0.2, penalty='l2', solver='lbfgs', random_state=1234))
 
         # Timing the training process
