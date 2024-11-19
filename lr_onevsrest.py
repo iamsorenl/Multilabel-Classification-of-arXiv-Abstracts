@@ -20,7 +20,6 @@ def train_logistic_regression(train, val, test, outfile):
 
         # Vectorize the text data using TfidfVectorizer
         vectorizer = TfidfVectorizer(max_features=30000, stop_words='english', ngram_range=(1, 2), min_df=2)
-        #vectorizer = CountVectorizer(max_features=30000, stop_words='english', ngram_range=(1, 2), min_df=2)
         train_features = vectorizer.fit_transform(train_text)
         val_features = vectorizer.transform(val_text)
         test_features = vectorizer.transform(test_text)
