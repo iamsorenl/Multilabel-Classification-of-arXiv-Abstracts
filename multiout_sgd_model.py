@@ -1,4 +1,3 @@
-import numpy as np
 import time
 from sklearn.metrics import f1_score, classification_report
 from sklearn.feature_extraction.text import TfidfVectorizer

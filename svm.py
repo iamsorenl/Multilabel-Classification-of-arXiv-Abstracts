@@ -1,63 +1,46 @@
 import time
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import StackingClassifier
-from sklearn.multioutput import MultiOutputClassifier
+from sklearn.svm import LinearSVC
+from sklearn.pipeline import make_pipeline
 from sklearn.metrics import f1_score, classification_report
-from sklearn.linear_model import RidgeClassifier
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.preprocessing import StandardScaler, MultiLabelBinarizer
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import MultiLabelBinarizer, StandardScaler
 
-
-def stacked_classifier_model(train, val, test, outfile):
+def svm_model(train, val, test, outfile):
     with open(outfile, 'w') as f:
-        # Combine titles and summaries
+        # Combine titles and summaries into text features
         train_text = train['titles'] + " " + train['summaries']
         val_text = val['titles'] + " " + val['summaries']
         test_text = test['titles'] + " " + test['summaries']
 
-        # TF-IDF vectorization
+        # Vectorize text data with TF-IDF
         vectorizer = TfidfVectorizer(max_features=30000, stop_words='english', ngram_range=(1, 2), min_df=2)
         train_features = vectorizer.fit_transform(train_text)
         val_features = vectorizer.transform(val_text)
         test_features = vectorizer.transform(test_text)
 
-        # Scale features
+        # Scale features for LinearSVC
         scaler = StandardScaler(with_mean=False)
         train_features = scaler.fit_transform(train_features)
         val_features = scaler.transform(val_features)
         test_features = scaler.transform(test_features)
 
-        # MultiLabelBinarizer for labels
+        # Transform labels into binary format
         mlb = MultiLabelBinarizer()
         train_labels_binary = mlb.fit_transform(train['terms'])
         val_labels_binary = mlb.transform(val['terms'])
         test_labels_binary = mlb.transform(test['terms'])
 
-        # Define base estimators
-        base_estimators = [
-            ('rf', MultiOutputClassifier(RandomForestClassifier(n_estimators=50, random_state=42, n_jobs=-1))),
-            ('ridge', MultiOutputClassifier(RidgeClassifier()))
-        ]
+        # Define the LinearSVC pipeline
+        clf = LinearSVC(C=10, max_iter=5000, random_state=42)
 
-        # Add Gradient Boosting Classifier as a separate model or in the final estimator
-        final_estimator = MultiOutputClassifier(GradientBoostingClassifier(n_estimators=50, random_state=42))
-
-        # Define stacking classifier
-        clf = StackingClassifier(
-            estimators=base_estimators,
-            final_estimator=final_estimator,
-            n_jobs=-1
-        )
-
-        # Train the stacking model
+        # Train the model
         start_time = time.time()
         clf.fit(train_features, train_labels_binary)
         train_time = time.time() - start_time
         print(f"\nTraining completed in {train_time:.2f} seconds.\n")
         f.write(f"Training completed in {train_time:.2f} seconds.\n")
 
-        # Make predictions on the validation set
+        # Make predictions on validation set
         start_time = time.time()
         val_predictions = clf.predict(val_features)
         val_time = time.time() - start_time
