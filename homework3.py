@@ -86,7 +86,7 @@ def main(data, outfile, plot, model, threshold):
         print("Invalid model. Please choose 'lr', 'sgd', 'stack', 'knn', or 'hier'.")
 
 if __name__ == "__main__":
-    # example use: python homework3.py --data arxiv_data.json --output results.txt --plot True
+    # example use: python homework3.py --data arxiv_data.json --output results.txt --plot True --model hier --threshold 0
     parser = argparse.ArgumentParser(description="Process arXiv data and output results.")
     parser.add_argument('--data', type=str, default="arxiv_data.json", help='Path to the input data file (e.g., arxiv_data.json)')
     parser.add_argument('--output', type=str, default="results.txt", help='Path to the output results file (e.g., results.txt)')
