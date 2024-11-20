@@ -4,8 +4,10 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import pandas as pd
 from lr_onevsrest import train_logistic_regression
-from multiout_sgd_model import multiout_sgd_model
+from sgd_model import sgd_model
 from stack_classifier import stacked_classifier_model
+from knn_model import knn_model
+from hierarchical_model import hierarchical_model
 
 def reduce_labels(data, threshold):
     # Flatten the lists of labels (assumes 'terms' column contains lists)
@@ -73,12 +75,15 @@ def main(data, outfile, plot, model, threshold):
     if model == 'lr':
         train_logistic_regression(train, val, test, outfile)
     elif model == 'sgd':
-        multiout_sgd_model(train, val, test, outfile)
+        sgd_model(train, val, test, outfile)
     elif model == 'stack':
         stacked_classifier_model(train, val, test, outfile)
+    elif model == 'knn':
+        knn_model(train, val, test, outfile)
+    elif model == 'hier':
+        hierarchical_model(train, val, test, outfile)
     else:
-        print("Invalid model. Please choose 'lr', 'sgd', 'stack'.")
-
+        print("Invalid model. Please choose 'lr', 'sgd', 'stack', 'knn', or 'hier'.")
 
 if __name__ == "__main__":
     # example use: python homework3.py --data arxiv_data.json --output results.txt --plot True
@@ -86,7 +91,7 @@ if __name__ == "__main__":
     parser.add_argument('--data', type=str, default="arxiv_data.json", help='Path to the input data file (e.g., arxiv_data.json)')
     parser.add_argument('--output', type=str, default="results.txt", help='Path to the output results file (e.g., results.txt)')
     parser.add_argument('--plot', type=bool, default=False, help='Whether to plot the data (True or False)')
-    parser.add_argument('--model', type=str, default='lr', help='Models to use: lr (for Logistic Regression with OneVsRest), sgd (for MultiOutputClassifier with SGD), stack (for StackingClassifier)')
+    parser.add_argument('--model', type=str, default='hier', help='Models to use: lr (for Logistic Regression with OneVsRest), sgd (for MultiOutputClassifier with SGD), stack (for StackingClassifier), knn (for KNeighborsClassifier), hier (for hierarchical model)')
     parser.add_argument('--threshold', type=int, default=0, help='Threshold for reducing labels based on frequency')
 
     args = parser.parse_args()

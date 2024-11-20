@@ -3,8 +3,11 @@ from sklearn.metrics import f1_score, classification_report
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import MultiLabelBinarizer, StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.multioutput import MultiOutputClassifier
+from sklearn.multiclass import OneVsRestClassifier
 from scipy.sparse import hstack
+import warnings
+from sklearn.exceptions import UndefinedMetricWarning
+warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
 
 def knn_model(train, val, test, outfile, max_features=30000, n_neighbors=5):
     # Open the output file for writing
@@ -27,7 +30,7 @@ def knn_model(train, val, test, outfile, max_features=30000, n_neighbors=5):
         val_features = hstack([val_title_features, val_summary_features])
         test_features = hstack([test_title_features, test_summary_features])
 
-        # Optionally scale features (important for distance-based models like k-NN)
+        # Scale features (important for distance-based models like k-NN)
         scaler = StandardScaler(with_mean=False)
         train_features = scaler.fit_transform(train_features)
         val_features = scaler.transform(val_features)
@@ -40,7 +43,7 @@ def knn_model(train, val, test, outfile, max_features=30000, n_neighbors=5):
         test_labels_binary = mlb.transform(test['terms'])
 
         # Define and fit the MultiOutputClassifier with KNeighborsClassifier as the base estimator
-        clf = MultiOutputClassifier(KNeighborsClassifier(n_neighbors=n_neighbors, n_jobs=-1))
+        clf = OneVsRestClassifier(KNeighborsClassifier(n_neighbors=n_neighbors, n_jobs=-1))
         
         # Train the model
         start_time = time.time()

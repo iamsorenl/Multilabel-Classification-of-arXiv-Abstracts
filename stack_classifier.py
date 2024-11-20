@@ -1,13 +1,10 @@
 import time
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import StackingClassifier
-from sklearn.multioutput import MultiOutputClassifier
-from sklearn.metrics import f1_score, classification_report
+from sklearn.ensemble import RandomForestClassifier, StackingClassifier, GradientBoostingClassifier
 from sklearn.linear_model import RidgeClassifier
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.preprocessing import StandardScaler, MultiLabelBinarizer
+from sklearn.metrics import f1_score, classification_report
+from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.feature_extraction.text import TfidfVectorizer
-
+from sklearn.multiclass import OneVsRestClassifier
 
 def stacked_classifier_model(train, val, test, outfile):
     with open(outfile, 'w') as f:
@@ -22,26 +19,19 @@ def stacked_classifier_model(train, val, test, outfile):
         val_features = vectorizer.transform(val_text)
         test_features = vectorizer.transform(test_text)
 
-        # Scale features
-        scaler = StandardScaler(with_mean=False)
-        train_features = scaler.fit_transform(train_features)
-        val_features = scaler.transform(val_features)
-        test_features = scaler.transform(test_features)
-
         # MultiLabelBinarizer for labels
         mlb = MultiLabelBinarizer()
         train_labels_binary = mlb.fit_transform(train['terms'])
         val_labels_binary = mlb.transform(val['terms'])
         test_labels_binary = mlb.transform(test['terms'])
 
-        # Define base estimators
+        # Simplified base estimators
         base_estimators = [
-            ('rf', MultiOutputClassifier(RandomForestClassifier(n_estimators=50, random_state=42, n_jobs=-1))),
-            ('ridge', MultiOutputClassifier(RidgeClassifier()))
+            ('rf', RandomForestClassifier(n_estimators=30, random_state=42, n_jobs=-1))
         ]
 
-        # Add Gradient Boosting Classifier as a separate model or in the final estimator
-        final_estimator = MultiOutputClassifier(GradientBoostingClassifier(n_estimators=50, random_state=42))
+        # Simplified final estimator
+        final_estimator = OneVsRestClassifier(GradientBoostingClassifier(n_estimators=30, random_state=42))
 
         # Define stacking classifier
         clf = StackingClassifier(
