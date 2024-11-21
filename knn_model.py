@@ -4,17 +4,19 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import MultiLabelBinarizer, StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.multiclass import OneVsRestClassifier
+from sklearn.decomposition import TruncatedSVD
 from scipy.sparse import hstack
 import warnings
 from sklearn.exceptions import UndefinedMetricWarning
+
 warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
 
-def knn_model(train, val, test, outfile, max_features=30000, n_neighbors=5):
+def knn_model(train, val, test, outfile):
     # Open the output file for writing
     with open(outfile, 'w') as f:
         # Vectorize separately using TF-IDF for titles and summaries
-        title_vectorizer = TfidfVectorizer(max_features=max_features, stop_words='english', ngram_range=(1, 2), min_df=2)
-        summary_vectorizer = TfidfVectorizer(max_features=max_features, stop_words='english', ngram_range=(1, 2), min_df=2)
+        title_vectorizer = TfidfVectorizer(max_features=50000, stop_words='english', ngram_range=(1, 3), sublinear_tf=True, min_df=2)
+        summary_vectorizer = TfidfVectorizer(max_features=50000, stop_words='english', ngram_range=(1, 3), sublinear_tf=True, min_df=2)
 
         # Fit and transform on training data; transform on validation/test data
         train_title_features = title_vectorizer.fit_transform(train['titles'])
@@ -30,8 +32,14 @@ def knn_model(train, val, test, outfile, max_features=30000, n_neighbors=5):
         val_features = hstack([val_title_features, val_summary_features])
         test_features = hstack([test_title_features, test_summary_features])
 
+        # Apply dimensionality reduction with TruncatedSVD
+        svd = TruncatedSVD(n_components=500)
+        train_features = svd.fit_transform(train_features)
+        val_features = svd.transform(val_features)
+        test_features = svd.transform(test_features)
+
         # Scale features (important for distance-based models like k-NN)
-        scaler = StandardScaler(with_mean=False)
+        scaler = StandardScaler()
         train_features = scaler.fit_transform(train_features)
         val_features = scaler.transform(val_features)
         test_features = scaler.transform(test_features)
@@ -42,8 +50,8 @@ def knn_model(train, val, test, outfile, max_features=30000, n_neighbors=5):
         val_labels_binary = mlb.transform(val['terms'])
         test_labels_binary = mlb.transform(test['terms'])
 
-        # Define and fit the MultiOutputClassifier with KNeighborsClassifier as the base estimator
-        clf = OneVsRestClassifier(KNeighborsClassifier(n_neighbors=n_neighbors, n_jobs=-1))
+        # Define and fit the OneVsRestClassifier with KNeighborsClassifier as the base estimator
+        clf = OneVsRestClassifier(KNeighborsClassifier(n_neighbors=5, metric='cosine', weights='distance', n_jobs=-1))
         
         # Train the model
         start_time = time.time()
