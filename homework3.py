@@ -9,6 +9,7 @@ from stack_classifier import stacked_classifier_model
 from knn_model import knn_model
 from hierarchical_model import hierarchical_model
 
+'''
 def reduce_labels(data, threshold):
     # Flatten the lists of labels (assumes 'terms' column contains lists)
     all_labels = data['terms'].explode()  # Expanding lists into individual elements
@@ -20,6 +21,50 @@ def reduce_labels(data, threshold):
     reduced_data = data[data['terms'].apply(lambda x: all(label in labels_to_keep for label in x))]
 
     return reduced_data
+'''
+'''def reduce_labels(data, threshold):
+    # Flatten the lists of labels (assumes 'terms' column contains lists)
+    all_labels = data['terms'].explode()  # Expanding lists into individual elements
+    label_counts = all_labels.value_counts()  # Count occurrences of each label
+
+    # Identify labels to keep based on the threshold
+    labels_to_keep = label_counts[label_counts >= threshold].index.tolist()
+    print(f"\nReducing labels from {len(label_counts)} to {len(labels_to_keep)} based on a threshold of {threshold} occurrences.")
+
+    # Replace labels not in labels_to_keep with 'unknown'
+    def replace_labels_with_unknown(label_list):
+        return [label if label in labels_to_keep else 'unknown' for label in label_list]
+
+    # Update the 'terms' column with replaced labels
+    updated_data = data.copy()
+    updated_data['terms'] = updated_data['terms'].apply(replace_labels_with_unknown)
+
+    return updated_data'''
+def reduce_labels(data, threshold):
+    # Flatten the lists of labels (assumes 'terms' column contains lists)
+    all_labels = data['terms'].explode()  # Expanding lists into individual elements
+    label_counts = all_labels.value_counts()  # Count occurrences of each label
+
+    # Identify labels to keep based on the threshold
+    labels_to_keep = label_counts[label_counts >= threshold].index.tolist()
+    print(f"\nReducing labels from {len(label_counts)} to {len(labels_to_keep)} based on a threshold of {threshold} occurrences.")
+
+    # Replace labels not in labels_to_keep with 'unknown'
+    def replace_labels_with_unknown(label_list):
+        return [label if label in labels_to_keep else 'unknown' for label in label_list]
+
+    # Update the 'terms' column with replaced labels
+    updated_data = data.copy()
+    updated_data['terms'] = updated_data['terms'].apply(replace_labels_with_unknown)
+
+    # Remove rows where the majority of labels are 'unknown'
+    def is_majority_unknown(label_list):
+        unknown_count = sum(label == 'unknown' for label in label_list)
+        return unknown_count > len(label_list) / 2
+
+    updated_data = updated_data[~updated_data['terms'].apply(is_majority_unknown)]
+
+    return updated_data
 
 def split_data(data):
     df = pd.DataFrame(data)
