@@ -9,7 +9,6 @@ from stack_classifier import stacked_classifier_model
 from knn_model import knn_model
 from hierarchical_model import hierarchical_model
 
-'''
 def reduce_labels(data, threshold):
     # Flatten the lists of labels (assumes 'terms' column contains lists)
     all_labels = data['terms'].explode()  # Expanding lists into individual elements
@@ -21,7 +20,8 @@ def reduce_labels(data, threshold):
     reduced_data = data[data['terms'].apply(lambda x: all(label in labels_to_keep for label in x))]
 
     return reduced_data
-'''
+
+# this version labels rare labels as unknown
 '''def reduce_labels(data, threshold):
     # Flatten the lists of labels (assumes 'terms' column contains lists)
     all_labels = data['terms'].explode()  # Expanding lists into individual elements
@@ -40,7 +40,9 @@ def reduce_labels(data, threshold):
     updated_data['terms'] = updated_data['terms'].apply(replace_labels_with_unknown)
 
     return updated_data'''
-def reduce_labels(data, threshold):
+
+# this version goes further and removes rows where the majority of labels are unknown
+'''def reduce_labels(data, threshold):
     # Flatten the lists of labels (assumes 'terms' column contains lists)
     all_labels = data['terms'].explode()  # Expanding lists into individual elements
     label_counts = all_labels.value_counts()  # Count occurrences of each label
@@ -64,7 +66,7 @@ def reduce_labels(data, threshold):
 
     updated_data = updated_data[~updated_data['terms'].apply(is_majority_unknown)]
 
-    return updated_data
+    return updated_data'''
 
 def split_data(data):
     df = pd.DataFrame(data)

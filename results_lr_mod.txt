@@ -1,0 +1,38 @@
+This version shows the results of reducing the training data to the classes that have at least 20,000 occurances. This significantly boosts LR
+
+Training completed in 0.18 seconds.
+Validation predictions completed in 0.00 seconds.
+
+Validation Set Performance:
+F1 Score (micro): 0.8673667389567401
+F1 Score (macro): 0.862194970665028
+
+Classification Report (Validation):
+
+              precision    recall  f1-score   support
+
+           0       0.86      0.97      0.91      4585
+           1       0.92      0.73      0.82      4336
+
+   micro avg       0.88      0.85      0.87      8921
+   macro avg       0.89      0.85      0.86      8921
+weighted avg       0.89      0.85      0.86      8921
+ samples avg       0.89      0.88      0.87      8921
+
+Test predictions completed in 0.00 seconds.
+
+Test Set Performance:
+F1 Score (micro): 0.865692018886171
+F1 Score (macro): 0.8618215251414374
+
+Classification Report (Test):
+
+              precision    recall  f1-score   support
+
+           0       0.85      0.96      0.90      4530
+           1       0.92      0.74      0.82      4412
+
+   micro avg       0.88      0.85      0.87      8942
+   macro avg       0.89      0.85      0.86      8942
+weighted avg       0.89      0.85      0.86      8942
+ samples avg       0.89      0.88      0.87      8942
